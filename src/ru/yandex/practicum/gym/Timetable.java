@@ -39,7 +39,6 @@ public class Timetable {
     }
 
 
-
     //сохраняем занятие в расписании
     public void addNewTrainingSession(TrainingSession trainingSession) {
         DayOfWeek day = trainingSession.getDayOfWeek();
