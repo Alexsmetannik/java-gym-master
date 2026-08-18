@@ -5,7 +5,7 @@ import java.util.*;
 public class Timetable {
 
     /* как это хранить??? */
-    public Map<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> timetable;
+    private final Map<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> timetable;
 
     public Timetable() {
         timetable = new EnumMap<>(DayOfWeek.class);
@@ -15,15 +15,12 @@ public class Timetable {
     }
 
     //как реализовать, тоже непонятно, но сложность должна быть О(1)
-    public List<TrainingSession> getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
-        List<TrainingSession> result = new ArrayList<>();
+    public SortedMap<TimeOfDay, List<TrainingSession>> getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
         TreeMap<TimeOfDay, List<TrainingSession>> daySessions = timetable.get(dayOfWeek);
-
-        for (List<TrainingSession> sessionsAtTime : daySessions.values()) {
-            result.addAll(sessionsAtTime);
+        if (daySessions == null) {
+            return Collections.emptySortedMap();
         }
-
-        return result;
+        return Collections.unmodifiableSortedMap(daySessions);
     }
 
     //как реализовать, тоже непонятно, но сложность должна быть О(1)
@@ -51,7 +48,7 @@ public class Timetable {
         sessionsAtTime.add(trainingSession);
     }
 
-    public List<Map.Entry<Coach, Integer>> getCountByCoaches() {
+    public List<CoachTrainingCount> getCountByCoaches() {
         Map<Coach, Integer> coachCount = new HashMap<>();
 
         for (TreeMap<TimeOfDay, List<TrainingSession>> daySessions : timetable.values()) {
@@ -63,10 +60,12 @@ public class Timetable {
             }
         }
 
-        List<Map.Entry<Coach, Integer>> sortedCoaches = new ArrayList<>(coachCount.entrySet());
-        sortedCoaches.sort((entry1, entry2)
-                -> entry2.getValue().compareTo(entry1.getValue()));
+        List<CoachTrainingCount> result = new ArrayList<>();
+        for (Map.Entry<Coach, Integer> entry : coachCount.entrySet()) {
+            result.add(new CoachTrainingCount(entry.getKey(), entry.getValue()));
+        }
 
-        return sortedCoaches;
+        result.sort((c1, c2) -> Integer.compare(c2.getCount(), c1.getCount()));
+        return result;
     }
 }
